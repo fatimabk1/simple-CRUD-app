@@ -78,8 +78,3 @@ def delete_contact(contact_id):
             return jsonify({"error": str(e)}), 500
     else:
         return jsonify({"error": "Contact not found"}), 404
-    
-
-if __name__ == "__main__":
-    port = os.environ.get('PORT', 5000)  # Default to 5000 if PORT is not set
-    app.run(debug=True, host='0.0.0.0', port=int(port))

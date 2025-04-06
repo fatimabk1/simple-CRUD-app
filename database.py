@@ -3,25 +3,16 @@ import uuid, os
 from flask_sqlalchemy import SQLAlchemy
 import pyodbc
 
-from azure.identity import ManagedIdentityCredential
+from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
 # Access securely stored secrets for database connection string
-credential = ManagedIdentityCredential()
-vault_url = "https://wse-keyvault.vault.azure.net/"
+credential = DefaultAzureCredential()
+vault_url = "https://contacts-key-vault.vault.azure.net/"
 client = SecretClient(vault_url=vault_url, credential=credential)
 
-db_user_secret = client.get_secret("DB_USER")
-db_host_secret = client.get_secret("DB_HOST")
-db_password_secret = client.get_secret("DB_PASSWORD")
-db_port_secret = client.get_secret("DB_PORT")
-db_name_secret = client.get_secret("DB_NAME")
-
-db_user = db_user_secret.value
-db_host = db_host_secret.value
-db_password = db_password_secret.value
-db_port = db_port_secret.value
-db_name = db_name_secret.value
+secret = "db-connection-string"
+db_connection_string = client.get_secret(secret).value
 
 # Set up actual database
 db = SQLAlchemy()
@@ -45,12 +36,15 @@ class Contact(db.Model):
         }
 
 def setup_db(app):
-    app.config['SQLALCHEMY_DATABASE_URI'] = (
-        f"mssql+pyodbc://{os.environ.get('DB_USER')}:{os.environ.get('DB_PASSWORD')}@"
-        f"{os.environ.get('DB_HOST')}:{os.environ.get('DB_PORT')}/{os.environ.get('DB_NAME')}?"
-        "driver=FreeTDS&Encrypt=yes&TrustServerCertificate=no&TDS_Version=8.0"
-    )
-    # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///contacts.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_connection_string
+    # (
+    #     f"mssql+pyodbc://{db_user}:{db_password}@"
+    #     f"{db_host}:{db_port}/{db_name}?"
+    #     "driver=FreeTDS&Encrypt=yes&TrustServerCertificate=no&TDS_Version=8.0"
+    # )
+    # db_connection_string = "mssql+pyodbc://azureuser:$25azurepass@fk-contacts-sql-server.database.windows.net:1433/contacts-db?driver=FreeTDS&Encrypt=yes&TrustServerCertificate=no&TDS_Version=8.0"
+
+
     db.init_app(app)
     with app.app_context():
         db.create_all()
