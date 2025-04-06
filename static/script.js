@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
+            if (data.id) {
             addContact(data);
             } else {
                 console.log("Error adding new contact:", data.error);
