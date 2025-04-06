@@ -1,12 +1,13 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+import os
 
 from database import setup_db, Contact, db
 
 def create_app():
-   app = Flask(__name__, static_folder='./static', template_folder='./templates')
-   CORS(app) 
-   return app
+    app = Flask(__name__, template_folder='./templates')
+    CORS(app) 
+    return app
 
 app = create_app()
 setup_db(app)
@@ -80,4 +81,5 @@ def delete_contact(contact_id):
     
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = os.environ.get('PORT', 5000)  # Default to 5000 if PORT is not set
+    app.run(debug=True, host='0.0.0.0', port=int(port))
