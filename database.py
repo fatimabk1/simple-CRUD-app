@@ -1,7 +1,6 @@
 import uuid, os
 
 from flask_sqlalchemy import SQLAlchemy
-import pyodbc
 
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
@@ -36,14 +35,7 @@ class Contact(db.Model):
         }
 
 def setup_db(app):
-    app.config['SQLALCHEMY_DATABASE_URI'] = db_connection_string
-    # (
-    #     f"mssql+pyodbc://{db_user}:{db_password}@"
-    #     f"{db_host}:{db_port}/{db_name}?"
-    #     "driver=FreeTDS&Encrypt=yes&TrustServerCertificate=no&TDS_Version=8.0"
-    # )
-    # db_connection_string = "mssql+pyodbc://azureuser:$25azurepass@fk-contacts-sql-server.database.windows.net:1433/contacts-db?driver=FreeTDS&Encrypt=yes&TrustServerCertificate=no&TDS_Version=8.0"
-
+    app.config['SQLALCHEMY_DATABASE_URI'] = (f"postgresql+psycopg2://{db_connection_string}")
 
     db.init_app(app)
     with app.app_context():
